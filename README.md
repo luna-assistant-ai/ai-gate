@@ -4,8 +4,14 @@
   <p>Integrate OpenAI Realtime API into your apps with just your API key. No infrastructure setup required.</p>
 
   [![Production](https://img.shields.io/badge/Production-Live-success)](https://www.ai-gate.dev)
-  [![API Status](https://img.shields.io/badge/API-Online-success)](https://api.ai-gate.dev/health)
+  [![API Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.ai-gate.dev%2Fhealth&label=API)](https://api.ai-gate.dev/health)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  [![GitHub Stars](https://img.shields.io/github/stars/luna-assistant-ai/ai-gate?style=social)](https://github.com/luna-assistant-ai/ai-gate)
+
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+  [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)](https://workers.cloudflare.com/)
+  [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+  [![Stripe](https://img.shields.io/badge/Stripe-Billing-purple)](https://stripe.com)
 </div>
 
 ---

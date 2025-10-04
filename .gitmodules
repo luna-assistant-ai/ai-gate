@@ -4,3 +4,6 @@
 [submodule "luna-proxy-web"]
 	path = luna-proxy-web
 	url = https://github.com/luna-assistant-ai/luna-proxy-web.git
+[submodule "luna-proxy-dashboard"]
+	path = luna-proxy-dashboard
+	url = https://github.com/CosteGieF/luna-proxy-dashboard.git
