@@ -1,0 +1,6 @@
+[submodule "luna-proxy-api"]
+	path = luna-proxy-api
+	url = https://github.com/luna-assistant-ai/luna-proxy-api.git
+[submodule "luna-proxy-web"]
+	path = luna-proxy-web
+	url = https://github.com/luna-assistant-ai/luna-proxy-web.git
