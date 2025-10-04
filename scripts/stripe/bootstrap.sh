@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Bootstrap Stripe products and prices for AI Gate plans
 # Usage: ./scripts/stripe-bootstrap.sh [test|live] [--force]
-# Requires: stripe CLI, jq
+# Requires: ~/bin/stripe CLI, jq
 
 set -euo pipefail
 
@@ -41,7 +41,7 @@ create_product() {
   local name="$1"
   echo "Creating product: $name"
   local prod_json
-  prod_json=$(stripe products create --name "$name" --active true)
+  prod_json=$(~/bin/stripe products create --name "$name" --active)
   echo "$prod_json" | jq -r '.id'
 }
 
@@ -50,7 +50,7 @@ create_base_price() {
   local amount_cents=$2
   local nickname=$3
   echo "Creating base price: $nickname ($((amount_cents)) cents/month)"
-  stripe prices create \
+  ~/bin/stripe prices create \
     --product "$product_id" \
     --currency usd \
     --unit_amount "$amount_cents" \
@@ -71,7 +71,7 @@ create_overage_price() {
     --arg overage "$overage_unit_amount_decimal_cents" \
     '[{"up_to": $up_to, "unit_amount": 0}, {"up_to": "inf", "unit_amount_decimal": $overage}]')
 
-  stripe prices create \
+  ~/bin/stripe prices create \
     --product "$product_id" \
     --currency usd \
     --billing_scheme tiered \
