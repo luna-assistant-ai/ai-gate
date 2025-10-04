@@ -134,12 +134,17 @@ dist/
 # Local development
 .vercel
 
-# Setup scripts with secrets (temporary utilities)
+# AI Gate - Temporary setup scripts with secrets
 setup-email-routing-direct.sh
 setup-emails-*.sh
 setup-cloudflare-emails.sh
 check-email-status.sh
 find-zone.sh
-GET-ADMIN-KEY.md
+verify-cloudflare.sh
 create-turn-token.sh
 test-*.sh
+oauth-credentials.txt
+
+# Stripe generated files (contain sensitive IDs)
+scripts/stripe-ids.*.json
+scripts/stripe/stripe-ids.*.json

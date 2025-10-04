@@ -1,0 +1,170 @@
+name: AI Gate Strategist
+version: 1.0.0
+schema: v1
+
+models:
+  - name: GPT-5 Strategy
+    provider: openai
+    model: gpt-5
+    apiKey: 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  # ← utilise une variable d'env ; ne commit jamais de clé en clair
+    stream: true
+    roles:
+      - chat
+      - edit
+      - apply
+    capabilities:
+      - tool_use
+    defaultCompletionOptions:
+      maxTokens: 4000
+      contextLength: 128000
+
+  - name: GPT-5 Autocomplete
+    provider: openai
+    model: gpt-5
+    apiKey: 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
+    stream: true
+    roles:
+      - autocomplete
+    defaultCompletionOptions:
+      maxTokens: 150
+      stop: ["\n\n", "###"]
+
+context:
+  - provider: code
+  - provider: docs
+  - provider: diff
+  - provider: terminal
+  - provider: problems
+  - provider: folder
+  - provider: codebase
+
+rules:
+  - name: Marketing & AI Strategy Expert
+    rule: |
+      Tu es un expert senior en stratégie Marketing/Growth et en technologies IA (API gateways, proxy/aggregators, SDKs).
+      Objectif: auditer https://www.ai-gate.dev/ et le repo associé pour produire des recommandations actionnables classées par impact/effort.
+      Contraintes et style:
+      - Langue: FR par défaut, court et concret, tableaux quand utile.
+      - Toujours fournir: (1) TL;DR priorisé, (2) quick wins 48–72h, (3) plan 4–6 semaines, (4) risques/mitigations.
+      - Quand tu proposes un axe, donne un exemple précis (copy, balises SEO, schéma d’archi, event tracking).
+      - Penser “API buyer journey” (Dev → Prototype → Scale): docs, onboarding, clés, pricing, fiabilité, statut, latence.
+      - Garder en tête les ICP: devs indie, startups AI, PME data, équipes plateforme.
+      - Respect sécurité: ne jamais divulguer ou demander des secrets. Préférer variables d'env et clés de test.
+
+  - name: Output Format Guardrails
+    rule: |
+      Structure attendue pour les audits:
+      1) TL;DR (5–7 puces)
+      2) Positionnement & UVP (tableau ICP × Jobs-to-be-Done × Proof)
+      3) SEO technique & contenu (checklist + priorités)
+      4) Funnel & onboarding API (frictions, métriques, suggestions)
+      5) Pricing & packaging (hypothèses, paliers, comparatifs)
+      6) Roadmap produit (SDKs, dashboard, analytics, statut/uptime)
+      7) Expériences Growth (ICE: Impact/Confidence/Effort)
+      8) Mesure & KPIs (events, dashboards, alertes)
+      9) Risques & mitigations
+      10) Next steps 48–72h
+
+prompts:
+  - name: site-audit
+    description: "Audit complet du site AI Gate (UX, messaging, SEO, conversion)"
+    prompt: |
+      URL à auditer: {url:=https://www.ai-gate.dev/}
+      Contexte repo: {folder}
+      Tâche:
+      - Analyse l'architecture d'info, le message (headline, sub, CTA), la preuve (logos, demos), et la hiérarchie visuelle.
+      - SEO: titres H1/H2, méta, perf perçue, maillage interne, schémas (FAQ, Product), sitemap/robots (si dispos).
+      - Conversion: clarté du “Your gateway to AI APIs”, proposition d’essai rapide, docs et path to first call.
+      - Renvoie l’audit au format “Output Format Guardrails”.
+
+  - name: positioning-canvas
+    description: "Positionnement, ICP, JTBD, UVP"
+    prompt: |
+      Produit: AI Gate (gateway/portal vers APIs d’IA). Tagline actuelle: "Your gateway to AI APIs".
+      Fais un canvas: ICP (3–4), Jobs-to-be-Done, pains/gains, UVP par ICP, features critiques, preuves (perf, sécurité, conformité).
+      Ajoute 3 variantes de tagline fortes et différenciantes, + un elevator pitch (30 mots).
+
+  - name: seo-audit
+    description: "Audit SEO technique + contenu"
+    prompt: |
+      Sur la base du site ({url:=https://www.ai-gate.dev/}) et des fichiers {docs} {code},
+      dresse une checklist priorisée:
+      - Technique: meta, opengraph, sitemap/robots, canonical, perf LCP/CLS, images, ARIA/Accessibilité de base.
+      - Contenu: pages clés à créer (Use cases, Quickstart, Pricing, Changelog, Status, Comparatifs).
+      - Propose 10 keywords mid/long-tail et 5 briefs d’articles “dev-first”.
+      Donne aussi 3 snippets FAQ Schema prêts à coller (JSON-LD).
+
+  - name: competitor-scan
+    description: "Cartographie concurrents / alternatives"
+    prompt: |
+      Sans browsing externe, dresse une cartographie indicative des catégories concurrentes d’AI Gate:
+      - API aggregators / proxies d’IA
+      - Gateways API (génériques) et API management
+      - SDK multi-fournisseurs IA
+      Pour chaque catégorie: forces/faiblesses attendues, angle de différenciation recommandé pour AI Gate, signaux de table stakes.
+
+  - name: pricing-strategy
+    description: "Hypothèses de pricing & packaging"
+    prompt: |
+      Propose 3 grilles de pricing (Starter, Pro, Scale) adaptées à AI Gate:
+      - Un mix volume d’appels, requêtes/min, features (failover, caching, retries, usage caps, audit logs).
+      - Ajoute essais gratuits, crédits de démarrage, et politique overage.
+      - Inclure FAQ pricing et exemples chiffrés de factures.
+
+  - name: onboarding-review
+    description: "Onboarding dev & time-to-first-call"
+    prompt: |
+      Objectif: réduire le TTFB (Time To First ‘Successful API Call’) à <10 min.
+      Livrables:
+      - Quickstart en 5 étapes (clé, SDK, snippet, test, prod).
+      - Exemples de requêtes cURL + Node + Python + Swift.
+      - Check de docs: structure, navigation, copy, exemples concrets.
+
+  - name: landing-rewrite
+    description: "Réécriture de la landing (hero, sections, CTA)"
+    prompt: |
+      Réécris le hero + 5 sections standard (Proof, Features, How it works, Pricing teaser, FAQ) pour AI Gate.
+      Conserve le ton “tech/fiable/innovant”, bleu/violet. Donne aussi variantes de CTA (évaluation A/B).
+
+  - name: growth-experiments
+    description: "Backlog d’expériences Growth priorisées (ICE)"
+    prompt: |
+      Génère 12 expériences (acquisition, activation, rétention, monétisation, referral). Score-les en ICE avec hypothèse, métrique primaire, owner, durée, coût approximatif.
+
+  - name: ai-roadmap
+    description: "Roadmap technique IA / SDKs / fiabilité"
+    prompt: |
+      Propose une roadmap 0–6 mois: SDKs (JS, Python, Swift), routing multi-modèles, fallback, caching, quotas, analytics, status page, SLO/SLI, webhooks, audit logs, RBAC, clés par projet.
+      Inclure schéma logique d’archi (texte ASCII) et priorisation.
+
+  - name: analytics-plan
+    description: "Plan de mesure & instrumentation"
+    prompt: |
+      Définis events/props pour: signup, key created, first call ok/ko, latency, tokens, retries, 4xx/5xx, churn.
+      Décris 5 dashboards (Activation, Reliability, Usage, Revenue, Cohortes) + alertes (pager) et seuils.
+
+  - name: trust-compliance
+    description: "Confiance: sécurité, statut, conformité"
+    prompt: |
+      Liste des éléments “trust” à mettre en place: page Status, SLA, DPA, data flow, retention, logs, secrets, rotation, clés.
+      Ajoute un plan SOC2-lite (policies, evidence rapides) et un Security.txt minimal.
+
+  - name: improvement-plan
+    description: "Axes d’amélioration priorisés (48–72h & 4–6 semaines)"
+    prompt: |
+      Compile les audits en un plan d’actions:
+      - Quick wins (48–72h) avec checklist et owners.
+      - Sprints 4–6 semaines (objectifs, livrables, critères de succès).
+      - Tableau Impact vs Effort et risques/mitigations.
+
+  - name: copy-polish
+    description: "Polish de la copy (ton, clarté, preuve)"
+    prompt: |
+      Prends n’importe quel extrait de la landing/docs que je colle ensuite et:
+      - Réécris en 2 tons: (A) “dev-first clair”, (B) “enterprise fiable”.
+      - Ajoute variantes de CTA et microcopy d’erreurs (API).
+
+  - name: changelog-template
+    description: "Template de changelog produit dev-friendly"
+    prompt: |
+      Donne un template de CHANGELOG.md pour AI Gate: sections Added/Changed/Fixed/Docs, tags de compatibilité, liens PR, et exemple de release notes courtes.

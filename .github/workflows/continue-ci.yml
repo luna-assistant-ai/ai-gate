@@ -1,0 +1,19 @@
+name: CI Workflow
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  run-continue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Continue Command
+        run: |
+          cn -p "Generate a conventional commit message for the current git changes"
+        env:
+          CONTINUE_API_KEY: ${{ secrets.CONTINUE_API_KEY }}

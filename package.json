@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@noble/hashes": "^2.0.1"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.9.1"
+  }
+}
