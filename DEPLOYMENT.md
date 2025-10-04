@@ -1,6 +1,19 @@
 # Guide de Déploiement Luna Proxy
 
+> **Note**: Ce projet utilise une architecture monorepo avec git submodules.
+> Voir [README.md](README.md) pour la structure complète.
+
 ## 🚀 Déploiement rapide
+
+### Prérequis
+```bash
+# Clone with submodules
+git clone --recursive https://github.com/luna-assistant-ai/luna-proxy-projects.git
+cd luna-proxy-projects
+
+# Or update existing submodules
+git submodule update --init --recursive
+```
 
 ### Staging
 ```bash
@@ -9,7 +22,7 @@ cd luna-proxy-api
 wrangler deploy --env staging
 
 # Web
-cd luna-proxy-web
+cd ../luna-proxy-web
 npm run build:cf
 wrangler deploy --env staging
 ```
@@ -21,7 +34,7 @@ cd luna-proxy-api
 wrangler deploy
 
 # Web
-cd luna-proxy-web
+cd ../luna-proxy-web
 npm run build:cf
 wrangler deploy --env production
 ```
