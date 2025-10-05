@@ -28,6 +28,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-10-05
+
+### Changed
+- Packaging OpenNext pour Cloudflare Workers stabilisé: `output: 'standalone'`, script `prepare:standalone`, et `build:cf` avec `--skipNextBuild`.
+- Scripts de build/deploy (web): `build:staging`, `build:production`, `deploy:staging`, `deploy:production`.
+- Alignement des bindings Cloudflare: `INTERNAL_API_URL` explicite (prod/staging) et KV RATE_LIMIT dédiée en staging.
+
+### Fixed
+- Erreur de bundling OpenNext (pages-manifest manquant) résolue via standalone + préparation.
+
+### Removed
+- Suppression du script `pages:deploy` et de la dépendance `@cloudflare/next-on-pages` (déploiement uniquement via Workers).
+
+### Security
+- `AUTH_SECRET` configuré en production pour NextAuth v5 (signature des tokens recommandée).
+
+### Docs
+- `luna-proxy-web/ARCHITECTURE.md`: workflow “vault-only BYOK” clarifié (deposit → unwrap-on-session), audit logging, AES-GCM.
+- `luna-proxy-api/README.md`: Quick Start “deposit key → request session with project_id”, options d’auth (project_id ou JWT), exemple de requête.
+
+### Deployments
+- Staging: web + API OK (workers.dev), plus de warnings bindings.
+- Production: web déployé, API healthy.
+
 ## [1.0.0] - 2025-10-04
 
 ### Added
