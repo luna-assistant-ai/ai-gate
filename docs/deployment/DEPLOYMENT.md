@@ -1,15 +1,15 @@
-# Guide de Déploiement Luna Proxy
+# Guide de Déploiement AI Gate
 
-> **Note**: Ce projet utilise une architecture monorepo avec git submodules.
-> Voir [README.md](README.md) pour la structure complète.
+> **Note**: Ce projet utilise un monorepo avec des sous-modules Git.
+> Voir [README.md](../README.md) pour la structure complète.
 
 ## 🚀 Déploiement rapide
 
 ### Prérequis
 ```bash
 # Clone with submodules
-git clone --recursive https://github.com/luna-assistant-ai/luna-proxy-projects.git
-cd luna-proxy-projects
+git clone --recursive https://github.com/luna-assistant-ai/ai-gate.git
+cd ai-gate
 
 # Or update existing submodules
 git submodule update --init --recursive
@@ -190,7 +190,7 @@ wrangler tail luna-proxy-api --format pretty
 
 ### Smoke test staging
 ```bash
-cd ~/luna-proxy-projects
+cd ~/ai-gate   # ou le chemin vers votre clone du monorepo
 export OPENAI_TEST_KEY="sk-proj-..."   # clé OpenAI dédiée aux tests
 ./scripts/smoke-staging.sh
 

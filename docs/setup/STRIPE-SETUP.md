@@ -1,161 +1,133 @@
-# Stripe Setup Guide - AI Gate
+# Stripe Setup Guide – Session-Based Pricing
 
-## 🎯 Quick Start (5 minutes)
-
-### 1. Create Stripe Account
-1. Go to https://stripe.com
-2. Sign up / Log in
-3. Activate test mode (toggle in top right)
+AI Gate utilise désormais des abonnements basés sur le **nombre de sessions** (1 session = 1 connexion WebRTC). Cette page décrit comment déployer ou répliquer la configuration Stripe pour les environnements **test** et **live**.
 
 ---
 
-## 📦 Step 1: Create Products and Prices (CLI recommended)
+## ⚙️ Prérequis
 
-This project uses monthly plans with included minutes and graduated metered overage.
+- [Stripe CLI](https://stripe.com/docs/stripe-cli) installée (`brew install stripe/stripe-cli/stripe`)
+- Connexion `stripe login` effectuée pour chaque mode (test et live)
+- `jq` disponible (`brew install jq`)
+- Accès à `wrangler` (`npm install -g wrangler`)
 
-Use the helper scripts:
-
-```sh
-# Test mode
-./scripts/stripe-bootstrap.sh test
-# Live mode
-./scripts/stripe-bootstrap.sh live
-```
-
-Plans created (USD):
-- Starter: $9/mo, 1500 min included, overage $0.012/min
-- Build:   $19/mo, 3000 min included, overage $0.011/min
-- Pro:     $39/mo, 8000 min included, overage $0.009/min
-- Agency:  $99/mo, 25000 min included, overage $0.008/min
-
-Outputs: scripts/stripe-ids.<mode>.json with product_*/price_* IDs.
+> ℹ️ Les scripts utilisent la variable `STRIPE` (par défaut `~/bin/stripe`). Vous pouvez la surcharger à l’exécution :
+> ```bash
+> STRIPE="stripe" ./scripts/stripe-setup-sessions.sh           # test (mode par défaut)
+> STRIPE="stripe --live" ./scripts/stripe-setup-sessions.sh    # live
+> ```
 
 ---
 
-## 🔑 Step 2: Configure Secrets (Wrangler)
+## 🚀 Étape 1 – Créer les produits & prix
 
-Use the export helper to print copy-paste commands:
+Exécuter le script CLI qui crée les plans **Starter** et **Growth** et génère un fichier d’inventaire.
 
-```sh
-./scripts/stripe-export-ids.sh test   # for staging
-./scripts/stripe-export-ids.sh live   # for production
+```bash
+# Mode test (par défaut)
+./scripts/stripe-setup-sessions.sh
+
+# Mode live (assurez-vous d’être connecté avec `stripe login --live`)
+STRIPE="stripe --live" ./scripts/stripe-setup-sessions.sh
 ```
 
-Then set them inside luna-proxy-api:
+Le script affiche les IDs créés et les enregistre dans :
+
+- `scripts/stripe-ids-sessions.test.json`
+- `scripts/stripe-ids-sessions.live.json` (si vous lancez la version live)
+
+| Plan    | Prix | Sessions/mois | Minutes estimées | Projets | Rate limit | Support |
+|---------|------|---------------|------------------|---------|------------|---------|
+| FREE    | $0   | 100           | ~200              | 1       | 100 req/min | Community |
+| STARTER | $29  | 5 000         | ~10 000           | 3       | 1 000 req/min | E-mail 48h |
+| GROWTH  | $99  | 20 000        | ~40 000           | 10      | 10 000 req/min | E-mail 24h + SLA 99.9 % |
+
+> Besoin d’une mise en place manuelle (UI Stripe) ? Consultez [STRIPE-PRODUCTS-MANUAL-SETUP.md](../STRIPE-PRODUCTS-MANUAL-SETUP.md).
+
+---
+
+## 🔐 Étape 2 – Exporter les secrets Wrangler
+
+Utilisez l’helper pour générer les commandes `wrangler secret put` adaptées :
+
+```bash
+# Environnement staging (mode test)
+./scripts/stripe-export-secrets-sessions.sh test
+
+# Production (mode live)
+./scripts/stripe-export-secrets-sessions.sh live
+```
+
+La sortie ressemble à :
 
 ```bash
 cd luna-proxy-api
-
-# Stripe secret key
-wrangler secret put STRIPE_SECRET_KEY [--env staging]
-# sk_test_... or sk_live_...
-
-# Webhook signing secret
-wrangler secret put STRIPE_WEBHOOK_SECRET [--env staging]
-# whsec_...
-
-# Base and overage price IDs
-wrangler secret put STRIPE_PRICE_STARTER_BASE [--env staging]
-wrangler secret put STRIPE_PRICE_STARTER_OVERAGE [--env staging]
-wrangler secret put STRIPE_PRICE_BUILD_BASE [--env staging]
-wrangler secret put STRIPE_PRICE_BUILD_OVERAGE [--env staging]
-wrangler secret put STRIPE_PRICE_PRO_BASE [--env staging]
-wrangler secret put STRIPE_PRICE_PRO_OVERAGE [--env staging]
-wrangler secret put STRIPE_PRICE_AGENCY_BASE [--env staging]
-wrangler secret put STRIPE_PRICE_AGENCY_OVERAGE [--env staging]
+wrangler secret put STRIPE_PRICE_STARTER       # price_...
+wrangler secret put STRIPE_PRICE_GROWTH        # price_...
+wrangler secret put STRIPE_SECRET_KEY          # sk_test_... / sk_live_...
+wrangler secret put STRIPE_WEBHOOK_SECRET      # whsec_...
 ```
 
----
-
-## 🪝 Step 3: Setup Webhooks
-
-Create webhook endpoints with the script:
-
-```sh
-./scripts/stripe-webhook-setup.sh test   # staging URL
-./scripts/stripe-webhook-setup.sh live   # production URL
-```
-
-Events:
-- checkout.session.completed
-- customer.subscription.created
-- customer.subscription.updated
-- customer.subscription.deleted
-- invoice.finalized
-- invoice.paid
-- invoice.payment_failed
-
-The script appends webhook id and, if returned by the CLI, the signing secret to scripts/stripe-ids.<mode>.json.
+Copiez-collez chaque valeur lorsque `wrangler` la demande. Pour l’environnement staging, ajoutez `--env staging` aux commandes.
 
 ---
 
-## ✅ Step 4: Verify Setup
+## 🪝 Étape 3 – Configurer les webhooks
 
-### Test with cURL (example)
+Les webhooks restent identiques : `checkout.session.completed`, `customer.subscription.*`, `invoice.*`. Vous pouvez :
 
-```bash
-# 1. Test checkout endpoint (adapt to your API)
-curl -X POST https://api.ai-gate.dev/billing/checkout \
-  -H "Content-Type: application/json" \
-  -d '{
-    "plan": "starter",
-    "user_id": "test_user_123",
-    "email": "test@example.com"
-  }'
+- Utiliser le helper CLI historique :
+  ```bash
+  ./scripts/stripe/webhook-setup.sh test
+  ./scripts/stripe/webhook-setup.sh live
+  ```
+- Ou créer l’endpoint manuellement via le dashboard Stripe (cf. section “Webhooks” de [STRIPE-PRODUCTS-MANUAL-SETUP.md](../STRIPE-PRODUCTS-MANUAL-SETUP.md)).
 
-# Expected: { "url": "https://checkout.stripe.com/..." }
-
-# 2. Test usage endpoint (if exposed)
-curl https://api.ai-gate.dev/billing/usage?user_id=test_user_123
-```
-
-### Test Webhooks with Stripe CLI
-
-```bash
-brew install stripe/stripe-cli/stripe
-stripe login
-stripe listen --forward-to https://luna-proxy-api-staging.joffrey-vanasten.workers.dev/webhooks/stripe
-stripe trigger checkout.session.completed
-```
+Notez l’ID et le secret retournés (`whsec_...`) puis ajoutez-les avec `wrangler secret put STRIPE_WEBHOOK_SECRET`.
 
 ---
 
-## 📊 Monitoring
+## ✅ Étape 4 – Vérifier la configuration
 
-- Stripe Dashboard → Payments / Subscriptions / Webhooks
-- D1 queries for webhook events and usage reconciliation
+1. **Checkout**
+   ```bash
+   curl -X POST https://api.ai-gate.dev/billing/checkout \
+     -H "Content-Type: application/json" \
+     -d '{
+       "plan": "starter",
+       "user_id": "test_user_123",
+       "email": "test@example.com"
+     }'
+   ```
+   → Une URL Stripe Checkout doit être retournée.
 
----
+2. **Webhook**
+   ```bash
+   stripe listen --forward-to https://api.ai-gate.dev/webhooks/stripe
+   stripe trigger checkout.session.completed
+   ```
+   → Vérifiez la réception du webhook (`wrangler tail`).
 
-## 🔒 Security Checklist
-
-- Webhook signing secret configured per environment
-- API keys stored as secrets
-- Webhook signature verified
-- Test mode enabled for staging
-- Never commit keys
-- Stripe Dashboard 2FA enabled
-
----
-
-## 🚨 Troubleshooting
-
-- STRIPE_SECRET_KEY not configured → wrangler secret put STRIPE_SECRET_KEY
-- Invalid signature on webhooks → verify STRIPE_WEBHOOK_SECRET
-- Checkout URL fails → check price IDs
-- Customer not found → ensure checkout flow creates customer
-
----
-
-## 📝 Next Steps
-
-- Configure secrets
-- Create webhook endpoint
-- Test checkout and usage
-- Add billing UI to dashboard
-- Set up monthly usage reporting
+3. **Usage**
+   ```bash
+   wrangler d1 execute luna-proxy-audit --remote \
+     --command "SELECT plan FROM stripe_customers WHERE user_id='test_user_123';"
+   ```
+   → Le plan doit passer à `starter`.
 
 ---
 
-**Setup Time:** ~10 minutes
-**Status:** Ready for testing
+## 🧭 Référence rapide
+
+- Script CLI principal : `./scripts/stripe-setup-sessions.sh`
+- Export Wrangler : `./scripts/stripe-export-secrets-sessions.sh [test|live]`
+- Fichiers d’IDs générés : `scripts/stripe-ids-sessions.<mode>.json`
+- Webhooks : `./scripts/stripe/webhook-setup.sh [test|live]`
+- Documentation complémentaire :
+  - [STRIPE-PRODUCTS-MANUAL-SETUP.md](../STRIPE-PRODUCTS-MANUAL-SETUP.md)
+  - [DEPLOYMENT-SUMMARY-SESSION-PRICING.md](../DEPLOYMENT-SUMMARY-SESSION-PRICING.md)
+  - [NEXT-STEPS.md](../NEXT-STEPS.md)
+
+---
+
+**Temps total :** ~10 minutes (hors validation live).

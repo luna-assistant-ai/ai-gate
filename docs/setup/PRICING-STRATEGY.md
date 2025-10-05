@@ -1,267 +1,159 @@
-# Stripe Pricing Strategy - AI Gate
+# Session-Based Pricing Strategy
 
-## 🎯 Modèle innovant : Pay-What-Works
+## 🎯 Vision
 
-### Philosophy
-**"Only pay for successful sessions"** - Alignement parfait entre coût et valeur.
+> **"Pay for the sessions you actually run."**
+>
+> 1 session = 1 connexion WebRTC complète via AI Gate (création d'un token éphémère + usage TURN si nécessaire).
 
----
-
-## 💰 Pricing Tiers
-
-### 1. **Free Tier** (No credit card)
-- **100 sessions/month**
-- **5 concurrent sessions max**
-- **Community support** (GitHub Discussions)
-- ✅ Perfect for: Testing, MVPs, hobbyists
-
-### 2. **Pay-as-you-go** (Usage-based)
-- **$0.10 per successful session**
-- **Unlimited concurrent sessions**
-- **Email support** (48h response)
-- **Guarantee**: Failed sessions = $0 charged
-  - Session drop (TURN fail)
-  - Latency >2s on connection
-  - OpenAI API error
-- ✅ Perfect for: Startups, growing apps
-
-### 3. **Pro Plan** (Volume discount)
-- **$29/month** = 400 sessions included (~$0.073/session)
-- **Then $0.07/session** after quota
-- **Unlimited concurrent sessions**
-- **Priority support** (24h response)
-- **SLA 99.9% uptime**
-- ✅ Perfect for: Production apps, scale-ups
+Le modèle est désormais **100 % orienté sessions**, avec suivi des minutes en interne uniquement pour l'analyse des coûts.
 
 ---
 
-## 🔧 Implementation Plan
+## 💰 Plans
 
-### Phase 1: Free Tier (Already implemented)
-- [x] Rate limiting (100 sessions/month via KV)
-- [x] Concurrent sessions limit (5 max)
-- [ ] Add counter in dashboard
+| Plan    | Prix mensuel | Sessions/mois | Minutes estimées | Projets | Rate limit | Support |
+|---------|--------------|---------------|------------------|---------|------------|---------|
+| Free    | $0           | 100           | ~200             | 1       | 100 req/min | Communauté, badge requis |
+| Starter | $29          | 5 000         | ~10 000          | 3       | 1 000 req/min | Email (48h) |
+| Growth  | $99          | 20 000        | ~40 000          | 10      | 10 000 req/min | Email (24h) + SLA 99.9 % |
 
-### Phase 2: Pay-as-you-go (This sprint)
-- [ ] Stripe Customer Portal
-- [ ] Session success tracking (D1)
-- [ ] Auto-charge at end of month
-- [ ] Webhook: `invoice.payment_succeeded`
-
-### Phase 3: Pro Plan (Later)
-- [ ] Stripe subscription
-- [ ] Quota tracking
-- [ ] Overage billing
+**Caractéristiques communes**
+- Sessions comptabilisées uniquement quand la connexion réussit (>5 s).
+- Minutes agrégées côté D1 (`minutes_used`) pour surveiller les coûts OpenAI/TURN.
+- Possibilité d'upgrade/downgrade self-service via Stripe Customer Portal.
 
 ---
 
-## 📊 Stripe Products Setup
+## 🔄 Parcours client
 
-### Free Tier
-```json
-{
-  "name": "AI Gate Free",
-  "description": "100 sessions/month - Perfect for testing",
-  "metadata": {
-    "plan": "free",
-    "monthly_quota": "100",
-    "concurrent_limit": "5"
-  }
-}
-```
-
-### Pay-as-you-go
-```json
-{
-  "name": "AI Gate Pay-as-you-go",
-  "type": "metered",
-  "unit_amount": 10,
-  "currency": "usd",
-  "recurring": {
-    "interval": "month",
-    "usage_type": "metered"
-  },
-  "metadata": {
-    "plan": "payg",
-    "success_only": "true"
-  }
-}
-```
-
-### Pro Plan
-```json
-{
-  "name": "AI Gate Pro",
-  "type": "licensed",
-  "unit_amount": 2900,
-  "currency": "usd",
-  "recurring": {
-    "interval": "month"
-  },
-  "metadata": {
-    "plan": "pro",
-    "included_sessions": "400",
-    "overage_price": "7"
-  }
-}
-```
+1. **Free** : onboarding sans CB, badge obligatoire.
+2. **Starter / Growth** : abonnement mensuel via Checkout Stripe.
+3. **Quota** : vérification `sessionsRemaining` côté API avant chaque `/session`.
+4. **Portail** : `/billing/portal` permet la gestion autonome de l'abonnement.
+5. **Alertes** (à implémenter) : e-mails 80 % / 100 % usage, suspension lorsqu'on dépasse le quota.
 
 ---
 
-## 🛠️ Technical Architecture
+## 🧱 Implémentation (statut)
 
-### Database Schema (D1)
+| Domaine | Action | Statut |
+|---------|--------|--------|
+| Stripe  | Produits & prix Starter/Growth | ✅ `stripe-setup-sessions.sh` |
+| API     | Nouvelle config `PLAN_CONFIG` | ✅ `src/utils/stripe.ts` |
+| API     | Tracking sessions (`trackSession`) | ✅ `src/index.ts` |
+| API     | Quota check (`checkQuotaRemaining`) | ✅ `src/index.ts` |
+| API     | Schemas D1 (minutes_used) | ✅ `schema-billing.sql` |
+| Dashboard | Affichage quotas sessions | 🔄 À mettre à jour (`luna-proxy-dashboard`) |
+| Dashboard | Page Pricing | 🔄 À rafraîchir |
+| Notifications | Emails 80 % / 100 % | 🔜 backlog |
+
+---
+
+## 🗄️ Schéma de données
 
 ```sql
--- Customers table
 CREATE TABLE IF NOT EXISTS stripe_customers (
   user_id TEXT PRIMARY KEY,
   stripe_customer_id TEXT UNIQUE NOT NULL,
   email TEXT NOT NULL,
-  plan TEXT DEFAULT 'free', -- free, payg, pro
+  plan TEXT DEFAULT 'free', -- free, starter, growth
+  stripe_subscription_id TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
-
--- Usage tracking
-CREATE TABLE IF NOT EXISTS session_usage (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  project_id TEXT NOT NULL,
-  session_id TEXT NOT NULL,
-  status TEXT NOT NULL, -- success, failed, timeout
-  duration_ms INTEGER,
-  charged BOOLEAN DEFAULT 0,
-  stripe_invoice_id TEXT,
-  created_at INTEGER NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES stripe_customers(user_id)
-);
-
-CREATE INDEX idx_usage_user_charged ON session_usage(user_id, charged);
-CREATE INDEX idx_usage_created ON session_usage(created_at);
 ```
 
-### API Endpoints
+```sql
+CREATE TABLE IF NOT EXISTS session_usage (
+  id TEXT PRIMARY KEY,
+  user_id TEXT,
+  project_id TEXT NOT NULL,
+  session_id TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL,
+  duration_ms INTEGER DEFAULT 0,
+  minutes_used INTEGER DEFAULT 0, -- internal tracking only
+  charged BOOLEAN DEFAULT 0,
+  stripe_invoice_id TEXT,
+  error_reason TEXT,
+  created_at INTEGER NOT NULL,
+  completed_at INTEGER
+);
+```
 
-#### `/api/billing/checkout` (Create checkout session)
+```sql
+CREATE TABLE IF NOT EXISTS monthly_usage (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  year INTEGER NOT NULL,
+  month INTEGER NOT NULL,
+  total_sessions INTEGER DEFAULT 0,
+  successful_sessions INTEGER DEFAULT 0,
+  failed_sessions INTEGER DEFAULT 0,
+  total_minutes_used INTEGER DEFAULT 0,
+  stripe_invoice_id TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+```
+
+---
+
+## 🧩 API & Backend
+
+### Checkout
 ```typescript
-POST /api/billing/checkout
-Body: { plan: 'payg' | 'pro' }
+POST /billing/checkout
+Body: { plan: 'starter' | 'growth', user_id, email }
 Response: { url: 'https://checkout.stripe.com/...' }
 ```
 
-#### `/api/billing/portal` (Customer portal)
+### Portal
 ```typescript
-POST /api/billing/portal
+POST /billing/portal
+Body: { user_id }
 Response: { url: 'https://billing.stripe.com/...' }
 ```
 
-#### `/api/billing/usage` (Current usage)
+### Usage
 ```typescript
-GET /api/billing/usage
-Response: {
-  plan: 'free',
-  sessions_this_month: 42,
-  quota: 100,
-  estimated_cost: 0
-}
+GET /billing/usage?user_id=...
+// Renvoie plan, sessionsIncluded, sessionsUsed, sessionsRemaining,
+// percentUsed, minutesUsed (estimation), rate limits
 ```
 
-#### `/api/webhooks/stripe` (Webhooks)
+### Session
 ```typescript
-POST /api/webhooks/stripe
-Events:
-  - customer.subscription.created
-  - customer.subscription.deleted
-  - invoice.payment_succeeded
-  - invoice.payment_failed
+POST /session
+Headers: Authorization: Bearer <JWT> (clé gérée) ou X-OpenAI-API-Key
+Comportement:
+  - Vérifie quota via checkQuotaRemaining
+  - Crée session OpenAI
+  - Enregistre session_usage + monthly_usage
+  - Retourne turn_credentials + client_secret
 ```
 
 ---
 
-## 🎨 UX Flow
+## 📈 Roadmap complémentaires
 
-### 1. User signs up
-→ Create Stripe Customer (free tier by default)
-→ Show dashboard with "100 free sessions"
-
-### 2. User hits quota
-→ Banner: "85/100 sessions used this month"
-→ CTA: "Upgrade to Pay-as-you-go"
-
-### 3. User clicks upgrade
-→ Stripe Checkout
-→ Choose: Pay-as-you-go ($0.10/session) or Pro ($29/mo)
-
-### 4. Payment succeeds
-→ Webhook updates plan in DB
-→ User can create unlimited sessions
-→ Usage tracked in D1
-
-### 5. End of month
-→ Stripe auto-generates invoice
-→ Charge only successful sessions
-→ Email receipt
+- **Usage-based add-on** – Pack sessions additionnels (ex : +1 000 sessions pour $10).
+- **Overage soft-cap** – Option d'activer un dépassement facturé automatiquement.
+- **Enterprise** – Négociation custom (contrats, invoicing manuel, usage illimité).
+- **Analytics** – Dashboard quotas + consommation minute vs sessions.
+- **Notifications** – Emails et webhooks quand `percentUsed` > 80/100.
 
 ---
 
-## 💡 Innovation: "Success Guarantee"
+## 🔗 Ressources
 
-### What counts as "successful"?
-✅ Session created + audio exchanged for >5 seconds
-✅ WebRTC connection established
-✅ No TURN failures
-
-❌ Not charged for:
-- TURN connection timeout
-- OpenAI API errors
-- Session drop <5s
-
-### Implementation
-```typescript
-// Mark session as billable
-async function markSessionSuccess(sessionId: string, duration: number) {
-  if (duration < 5000) return; // Don't charge if <5s
-
-  await env.DB.prepare(`
-    UPDATE session_usage
-    SET status = 'success', duration_ms = ?
-    WHERE session_id = ? AND status = 'pending'
-  `).bind(duration, sessionId).run();
-}
-```
+- CLI : `./scripts/stripe-setup-sessions.sh`
+- Secrets : `./scripts/stripe-export-secrets-sessions.sh`
+- Documentation :
+  - [DEPLOYMENT-SUMMARY-SESSION-PRICING.md](../DEPLOYMENT-SUMMARY-SESSION-PRICING.md)
+  - [NEXT-STEPS.md](../NEXT-STEPS.md)
+  - [STRIPE-PRODUCTS-MANUAL-SETUP.md](../STRIPE-PRODUCTS-MANUAL-SETUP.md)
 
 ---
 
-## 📈 Metrics to track
-
-- **Conversion rate**: Free → Paid
-- **Churn rate**: Monthly cancellations
-- **ARPU**: Average revenue per user
-- **Success rate**: Sessions charged / Sessions created
-- **MRR**: Monthly recurring revenue
-
----
-
-## 🚀 Launch Checklist
-
-### MVP (This sprint)
-- [ ] Stripe account setup
-- [ ] Create products in Stripe Dashboard
-- [ ] Implement checkout endpoint
-- [ ] Implement webhook handler
-- [ ] Basic usage tracking
-- [ ] Dashboard billing section
-
-### V2 (Later)
-- [ ] Pro plan with quotas
-- [ ] Volume discounts
-- [ ] Enterprise custom pricing
-- [ ] Detailed invoices (PDF)
-- [ ] Tax handling (Stripe Tax)
-
----
-
-**Start with**: Pay-as-you-go only (simplest)
-**Pricing**: $0.10/session (success-only)
-**Free tier**: 100 sessions/month (already working)
+**Dernière mise à jour :** 2025-10-06

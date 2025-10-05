@@ -164,7 +164,7 @@ STRIPE_PRICE_GROWTH: string;   // $99/mo - 20000 sessions
 ### Étape 1: Créer les produits Stripe
 
 ```bash
-cd /Users/joffreyvanasten/luna-proxy-projects
+cd /path/to/ai-gate
 
 # Mode test (recommandé d'abord)
 ./scripts/stripe-setup-sessions.sh

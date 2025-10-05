@@ -96,7 +96,7 @@ Clique sur **"Save product"**
 Une fois les 2 produits créés, configure les secrets dans ton Worker :
 
 ```bash
-cd /Users/joffreyvanasten/luna-proxy-projects/luna-proxy-api
+cd /path/to/ai-gate/luna-proxy-api
 
 # Configurer STARTER
 echo "price_XXXXXXXXXXXXX" | wrangler secret put STRIPE_PRICE_STARTER

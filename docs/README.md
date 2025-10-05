@@ -61,21 +61,21 @@ docs/
 | [PRICING-STRATEGY.md](setup/PRICING-STRATEGY.md) | Pricing tiers and strategy | - |
 
 #### Stripe Setup
-- Create products and prices
+- Create session-based products and prices
 - Configure webhooks
 - Set up secrets
 - Test billing flow
 
 **Quick Start:**
 ```bash
-# Bootstrap Stripe
-./scripts/stripe/bootstrap.sh test
+# Session-based plans (saves IDs to scripts/stripe-ids-sessions.test.json)
+./scripts/stripe-setup-sessions.sh
 
-# Setup webhooks
+# Export Stripe price IDs to copy/paste into wrangler secrets
+./scripts/stripe-export-secrets-sessions.sh test
+
+# Optional: provision webhook endpoints via CLI
 ./scripts/stripe/webhook-setup.sh test
-
-# Export secrets
-./scripts/stripe/export-ids.sh test
 ```
 
 #### Email Setup
@@ -192,9 +192,12 @@ All shared scripts are documented in [scripts/README.md](../scripts/README.md).
 
 ### Stripe Scripts
 
-- `scripts/stripe/bootstrap.sh` - Create products and prices
-- `scripts/stripe/export-ids.sh` - Export IDs for secrets
-- `scripts/stripe/webhook-setup.sh` - Configure webhooks
+- `scripts/stripe-setup-sessions.sh` – Crée les abonnements Starter/Growth (session-based)
+- `scripts/stripe-export-secrets-sessions.sh` – Génère les commandes `wrangler secret put`
+- `scripts/stripe/webhook-setup.sh` – Provisionne les webhooks (facultatif)
+- `scripts/STRIPE-PRODUCTS-MANUAL-SETUP.md` – Procédure manuelle via le dashboard
+
+> Les scripts historiques basés sur les minutes (`scripts/stripe/bootstrap.sh`, `scripts/stripe/export-ids.sh`) restent disponibles uniquement pour les audits/archives.
 
 ### Cloudflare Scripts
 

@@ -48,7 +48,7 @@ ai-gate/
 - 💻 **Simple API** - One endpoint, clear responses
 - 🌍 **Global Edge** - Deployed on Cloudflare Workers
 - 🎙️ **WebRTC Included** - TURN credentials provided automatically
-- 💳 **Stripe Billing** - Metered usage with multiple tiers
+- 💳 **Stripe Billing** - Session-based quotas (Free / Starter / Growth)
 
 ---
 
@@ -114,16 +114,17 @@ See [luna-proxy-web/README.md](luna-proxy-web/README.md) for full setup.
 ### Stripe Setup
 
 ```bash
-# Bootstrap Stripe products and prices
-./scripts/stripe/bootstrap.sh test   # Test mode
-./scripts/stripe/bootstrap.sh live   # Live mode
+# Create session-based products & prices (defaults to test mode)
+./scripts/stripe-setup-sessions.sh
 
 # Export Stripe IDs for wrangler secrets
-./scripts/stripe/export-ids.sh test
+./scripts/stripe-export-secrets-sessions.sh test
 
-# Setup webhooks
+# (Optional) Configure webhooks via CLI helper
 ./scripts/stripe/webhook-setup.sh test
 ```
+
+Outputs are saved in `scripts/stripe-ids-sessions.<mode>.json` so you can inspect product/price IDs later or promote them to live mode.
 
 ### Cloudflare Utilities
 
