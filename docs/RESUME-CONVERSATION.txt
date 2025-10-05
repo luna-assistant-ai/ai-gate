@@ -1,0 +1,79 @@
+Résumé de la conversation (synthèse exécutable)
+
+1) Contexte et objectifs
+- Projet: AI Gateway temps réel hébergée sur VOTRE compte Cloudflare (pas d’infra chez le client).
+- Cibles: startups/équipes platform/agences qui veulent auth, quotas, métriques, vault chiffré, TURN pour la voix, avec TTFHW < 5 min.
+- Exigence: marge cible 90% et couverture 100% des cas (TURN auto partout).
+
+2) Positionnement produit
+- Edge-first Cloudflare, latence faible, gouvernance (JWT, rate limits/quotas, audit D1, coffre-fort KEK/DEK), Next.js dashboard + playground.
+- Différenciation vs concurrents:
+  • Portkey: eux = multi-provider + cache/guardrails enterprise; nous = hébergé, edge, realtime + TURN intégré, zéro infra client.
+  • Langfuse/Helicone: eux = observabilité; nous = gateway d’exécution + gouvernance (complémentaires).
+  • Cloudflare AI Gateway: eux = infra-level; nous = app-layer (projets, quotas, vault, billing, TURN temps réel).
+
+3) Hébergement et infra (multi-tenant chez vous)
+- Quotas/alertes par tenant, hard cap Free, overage opt-in sur payants.
+- Rate limit par tenant + limites de concurrence; anti-abus sur endpoints sensibles.
+- Data residency EU en option; audit D1 + Analytics Engine pour observabilité.
+
+4) Coûts (COGS) Cloudflare et fourchettes
+- Dominante coût: KV writes (Workers req/CPU quasi négligeables par 1k).
+- Estimation actuelle: ~4 writes/req → ~0,02–0,03 €/1k au-delà des inclus.
+- Optimisations visées: ~2,1 writes/req voire ~1,1 → COGS ~0,01–0,02 €/1k.
+- Quotas inclus CF (goulot = 1M writes/mo):
+  • Aujourd’hui ~250k req/mo gratuites agrégées (~4 writes/req).
+  • Après optimisations ~476k (≈2,1 writes/req) → jusqu’à ~900k (≈1,1 writes/req).
+
+5) TURN: stratégie "auto" partout
+- Politique: STUN par défaut; si ICE échoue/stagne, fetch /turn-credentials, setConfiguration, ICE restart.
+- Implémentation:
+  • /session: par défaut ne pas inclure les creds TURN (générer à la demande).
+  • /turn-credentials: garder, ajouter micro-cache KV (TTL ≈ TURN_TTL_SECONDS-15s) + rate limit.
+  • Télémétrie: taux d’usage TURN (%), durée relay.
+- Impact coûts: marginal côté émission de credentials; le coût lourd dépend du trafic relay (rare). Auto couvre 100% des cas.
+
+6) État du code et écarts constatés
+- /session appelle toujours getTurnCredentials → génère TURN systématiquement (à corriger pour mode auto).
+- Métriques: deux writes KV par requête (addSessionMetric + updateMetrics).
+- trackClientUsage: 1 write/req (à batcher).
+- Concurrence: KV.list (à remplacer par compteur atomique / Durable Object ou design sans list).
+
+7) Optimisations COGS prioritaires
+- Metrics: fusionner en 1 seul write KV par requête ou basculer le détail vers Analytics Engine + flush périodique en KV.
+- Usage clients: batch par client (flush chaque 30–60 s) → ~0,1 write/req.
+- Concurrence: supprimer KV.list → compteur atomique.
+- Caches additionnels: TURN micro-cache KV, getClient() cache mémoire 60s, cache HTTP /metrics (caches.default, max-age 10s), idempotency /session TTL court.
+
+8) Politique tarifaire (révisée, par requêtes + overage)
+- Free: 10k req/mo, hard cap, TURN auto, 1 projet, métriques 7 j, support communauté.
+- Starter (9 €): 90k inclus, overage 0,15 €/1k, 3 projets, métriques 30 j, alertes 50/80/100%, rate limit/quotas.
+- Growth (19 €): 190k, overage 0,13 €/1k, 10 projets, webhooks/export CSV, budgets, export Analytics périodique, métriques 90 j.
+- Pro (39 €): 390k, overage 0,12 €/1k, projets illimités, alertes avancées (Slack), export Datadog/Logs, RBAC basique, métriques 180 j, SLA 99,9%.
+- Agency (99 €): 990k, overage 0,10 €/1k, multi-orgs/sièges, data residency EU, support prioritaire, portail client, métriques 365 j.
+- Enterprise: SSO/SCIM, audit avancé, DPA, SLA 99,95%, options dédiées.
+
+9) Stripe: état et mise en œuvre
+- Stripe n’a pas supprimé l’usage-based; migration recommandée vers Billing Meters (usage records legacy → meters).
+- Modèle: abonnement mensuel + price metered lié à un meter "api_request" (unités par 1000).
+- Deux options pour l’inclus: (A) calcul de l’overage côté gateway (publier seulement l’excédent) — simple et robuste; (B) tiers gradués dans Stripe — plus complexe.
+
+10) Capacité clients sous quotas inclus
+- À 25k req/mo par client: ~10–20 clients avant overage (selon optimisations KV).
+- À 100k req/mo: ~2–5 clients.
+- D’où: quotas/alertes par tenant indispensables pour protéger les quotas CF partagés.
+
+11) Go-to-market (rappel synthétique)
+- Landing concise (snippet, bench overhead, TURN auto), démo vidéo 60–90s.
+- Templates GitHub (Next.js & Worker), pages comparatives (vs Portkey/CF Gateway), guides realtime (TURN/ICE/VAD).
+- Lancements: Cloudflare Dev Forum, HN, Product Hunt.
+
+12) Prochaines étapes proposées
+- Implémenter TURN auto (API + playground) + micro-cache KV TURN + rate limit endpoint.
+- Réduire KV writes/req: metrics 1 write + batching usage + supprimer KV.list.
+- Migrer la facturation de minutes → requêtes (Stripe Billing Meters) et appliquer la grille ci-dessus.
+- Mettre en place quotas/budgets/alertes 50/80/100% par tenant + option stop at 100%.
+- Dashboard interne "capacité CF" (consommation Workers/KV/D1 + projections) + alertes 70/85/95%.
+
+Verdict
+- Le projet fait sens: différenciation edge + realtime hébergé, gouvernance complète, TTV court. Avec TURN auto partout, pricing par requêtes, et optimisations KV, la marge 90% est réaliste et la couverture d’usage est totale.

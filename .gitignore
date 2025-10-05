@@ -148,3 +148,4 @@ oauth-credentials.txt
 # Stripe generated files (contain sensitive IDs)
 scripts/stripe-ids.*.json
 scripts/stripe/stripe-ids.*.json
+.aider*

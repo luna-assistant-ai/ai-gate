@@ -1,0 +1,56 @@
+{
+  "mode": "test",
+  "created_at": "2025-10-05T16:12:30Z",
+  "pricing_model": "session_based_with_quotas",
+  "plans": {
+    "free": {
+      "product_id": null,
+      "price_id": null,
+      "amount_usd": 0,
+      "sessions_quota": 100,
+      "estimated_minutes": 200,
+      "projects": 1,
+      "rate_limit_rpm": 100,
+      "concurrent": 1,
+      "features": {
+        "badge_required": true,
+        "support": "community"
+      }
+    },
+    "starter": {
+      "product_id": "prod_TB4VV8Zdq67JBU",
+      "price_id": "price_1SEiMwD10JtvEUh4Zbpwm1eW",
+      "amount_usd": 29,
+      "sessions_quota": 5000,
+      "estimated_minutes": 10000,
+      "projects": 3,
+      "rate_limit_rpm": 1000,
+      "concurrent": 10,
+      "features": {
+        "badge_required": false,
+        "support": "email-48h"
+      }
+    },
+    "growth": {
+      "product_id": "prod_TB4W5HcYWuDiaQ",
+      "price_id": "price_1SEiN8D10JtvEUh4kSmrbY2k",
+      "amount_usd": 99,
+      "sessions_quota": 20000,
+      "estimated_minutes": 40000,
+      "projects": 10,
+      "rate_limit_rpm": 10000,
+      "concurrent": 50,
+      "features": {
+        "badge_required": false,
+        "support": "email-24h",
+        "sla": "99.9%"
+      }
+    }
+  },
+  "notes": {
+    "billable_unit": "sessions (one WebRTC connection)",
+    "internal_tracking": "minutes tracked for cost analysis only",
+    "rate_limits": "protect infrastructure from abuse",
+    "openai_costs": "Billed separately with user's own API key"
+  }
+}
