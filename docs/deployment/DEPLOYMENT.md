@@ -168,6 +168,8 @@ await db.prepare('INSERT INTO user_projects (...) VALUES (?, ...)')
 ### Après déploiement
 - [ ] Tester signup/login
 - [ ] Tester création de projet
+- [ ] Lancer le smoke test staging (`OPENAI_TEST_KEY=… ./scripts/smoke-staging.sh`)
+- [ ] Révoquer la clé OpenAI de test utilisée pour le smoke test
 - [ ] Vérifier logs : `wrangler tail [worker-name]`
 - [ ] Tester les routes principales
 
@@ -184,6 +186,16 @@ curl -I https://www.ai-gate.dev
 # Voir les logs en temps réel
 wrangler tail luna-proxy-web-frontend --format pretty
 wrangler tail luna-proxy-api --format pretty
+```
+
+### Smoke test staging
+```bash
+cd ~/luna-proxy-projects
+export OPENAI_TEST_KEY="sk-proj-..."   # clé OpenAI dédiée aux tests
+./scripts/smoke-staging.sh
+
+# Le script crée un utilisateur jetable, se connecte, crée puis supprime un projet.
+# À la fin, révoque immédiatement la clé OpenAI utilisée.
 ```
 
 ### Debugging
