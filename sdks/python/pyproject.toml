@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-gate"
+version = "1.0.0"
+description = "Official Python SDK for AI Gate - OpenAI Realtime API Proxy"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["ai-gate", "openai", "realtime-api", "webrtc", "turn", "sdk"]
+authors = [
+  { name = "AI Gate", email = "support@ai-gate.dev" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "httpx>=0.25.0",
+  "typing-extensions>=4.5.0; python_version < '3.10'",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0.0",
+  "pytest-asyncio>=0.21.0",
+  "black>=23.0.0",
+  "ruff>=0.1.0",
+  "mypy>=1.0.0",
+]
+
+[project.urls]
+Documentation = "https://www.ai-gate.dev/docs"
+Homepage = "https://www.ai-gate.dev"
+Repository = "https://github.com/luna-assistant-ai/ai-gate"
+Issues = "https://github.com/luna-assistant-ai/ai-gate/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ai_gate"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
