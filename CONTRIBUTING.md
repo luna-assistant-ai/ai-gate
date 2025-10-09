@@ -1,54 +1,54 @@
-# Contribuer à AI Gate
+# Contributing to AI Gate
 
-Merci de votre intérêt pour AI Gate !
+Thanks for your interest in AI Gate!
 
-## Principes
-- Petits PRs, messages de commit en français (conventional commits)
-- Tests, type-check et lint doivent passer
-- Respect du Code de Conduite
-- DCO (Signed-off-by) requis sur chaque commit
+## Principles
+- Small PRs, English commit messages (conventional commits)
+- Tests, type-check, and lint must pass
+- Respect the Code of Conduct
+- DCO (Signed-off-by) required on every commit
 
-## Démarrage rapide (monorepo)
-- Cloner avec submodules: `git clone --recursive`
+## Quick start (monorepo)
+- Clone with submodules: `git clone --recursive`
 - Web (luna-proxy-web): `npm ci && npm run validate`
-- API (luna-proxy-api): voir README du sous-repo
+- API (luna-proxy-api): see the sub-repo README
 
-## Workflow (aligné au fichier luna-proxy-web/.claude/workflow.md)
-1) Planifier (todo list si 3+ étapes) et valider l’approche
-2) Marquer in_progress, coder par étapes avec tests
-3) `npm run validate` avant chaque commit
-4) Commits: `type: description courte` (feat, fix, refactor, docs, test, chore)
-5) Ouvrir une PR, compléter le template, lier les issues
+## Workflow (aligned with luna-proxy-web/.claude/workflow.md)
+1) Plan (todo list if 3+ steps) and validate the approach
+2) Mark in_progress, implement step by step with tests
+3) `npm run validate` before every commit
+4) Commits: `type: short description` (feat, fix, refactor, docs, test, chore)
+5) Open a PR, fill the template, link issues
 
 ## DCO (Developer Certificate of Origin)
-Ajoutez une ligne Signed-off-by à chaque commit:
+Add a Signed-off-by line to every commit:
 
 ```
-Signed-off-by: Prénom Nom <email@example.com>
+Signed-off-by: Full Name <email@example.com>
 ```
 
-Configurer git pour signer automatiquement:
+Configure git to sign automatically:
 
 ```
-git config --global user.name "Prénom Nom"
+git config --global user.name "Full Name"
 git config --global user.email "email@example.com"
-git commit -s -m "feat: ajouter X"
+git commit -s -m "feat: add X"
 ```
 
-## Tests et validation
+## Tests and validation
 - Web: `cd luna-proxy-web && npm run validate`
-- API: se référer au sous-repo
+- API: see the sub-repo
 
-## Signalement de bugs et demandes
-- Bugs: Issues (template Bug)
-- Features: Issues (template Feature)
-- Questions: Discussions ou template Question
-- Sécurité: voir SECURITY.md (ne pas créer d’issue publique)
+## Reporting bugs and requests
+- Bugs: Issues (Bug template)
+- Features: Issues (Feature template)
+- Questions: Discussions or Question template
+- Security: see SECURITY.md (do not open a public issue)
 
 ## Communication
-- Directe et concise
-- Poser des questions si incertain
-- Respect du Code de Conduite
+- Direct and concise
+- Ask questions if uncertain
+- Respect the Code of Conduct
 
 ## Contact
 - Support: support@ai-gate.dev
