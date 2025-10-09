@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: [enhancement]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an idea!
+  - type: input
+    id: problem
+    attributes:
+      label: Problem to solve
+      placeholder: Describe the user problem or job-to-be-done
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: Describe the solution you'd like
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: input
+    id: impact
+    attributes:
+      label: Expected impact / metrics
+      placeholder: e.g. reduce setup time by 50%
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues
+          required: true
+        - label: I can help with a PR
+          required: false

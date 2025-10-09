@@ -1,0 +1,30 @@
+- name: bug
+  color: d73a4a
+  description: Something isn't working
+- name: enhancement
+  color: a2eeef
+  description: New feature or request
+- name: question
+  color: d4c5f9
+  description: Further information is requested
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+- name: help wanted
+  color: 008672
+  description: Extra attention is needed
+- name: docs
+  color: 0075ca
+  description: Documentation changes
+- name: chore
+  color: cccccc
+  description: Maintenance tasks
+- name: refactor
+  color: fbca04
+  description: Code refactoring
+- name: test
+  color: bfdadc
+  description: Adding or updating tests
+- name: skip-changelog
+  color: fef2c0
+  description: Exclude from Release Drafter

@@ -1,0 +1,26 @@
+name-template: 'v$NEXT_PATCH_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
+change-template: '- $TITLE (#$NUMBER) by @$AUTHOR'
+categories:
+  - title: '🚀 Features'
+    labels:
+      - feat
+  - title: '🐛 Bug Fixes'
+    labels:
+      - fix
+  - title: '🧰 Maintenance'
+    labels:
+      - chore
+      - refactor
+      - docs
+  - title: '🧪 Tests'
+    labels:
+      - test
+exclude-labels:
+  - skip-changelog
+template: |
+  ## Changes
+  $CHANGES
+
+  ## Thanks to our contributors 👏
+  $CONTRIBUTORS

@@ -5,7 +5,7 @@
 
   [![Production](https://img.shields.io/badge/Production-Live-success)](https://www.ai-gate.dev)
   [![API Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.ai-gate.dev%2Fhealth&label=API)](https://api.ai-gate.dev/health)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
   [![GitHub Stars](https://img.shields.io/github/stars/luna-assistant-ai/ai-gate?style=social)](https://github.com/luna-assistant-ai/ai-gate)
 
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
@@ -291,7 +291,9 @@ See [Pricing Strategy](docs/setup/PRICING-STRATEGY.md) for complete details.
 
 ## 📝 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Code: Apache License 2.0 - see [LICENSE](LICENSE)
+Docs: CC BY 4.0 - see [LICENSE-Docs](LICENSE-Docs)
+Trademarks: see [TRADEMARKS.md](TRADEMARKS.md)
 
 ---
 

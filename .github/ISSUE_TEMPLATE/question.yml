@@ -1,0 +1,23 @@
+name: Question
+description: Ask a question or request clarification
+labels: [question]
+assignees: []
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      placeholder: Be as specific as possible
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Context (version, environment)
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and discussions
+          required: true
