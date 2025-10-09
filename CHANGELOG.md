@@ -31,26 +31,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2025-10-05
 
 ### Changed
-- Packaging OpenNext pour Cloudflare Workers stabilisé: `output: 'standalone'`, script `prepare:standalone`, et `build:cf` avec `--skipNextBuild`.
-- Scripts de build/deploy (web): `build:staging`, `build:production`, `deploy:staging`, `deploy:production`.
-- Alignement des bindings Cloudflare: `INTERNAL_API_URL` explicite (prod/staging) et KV RATE_LIMIT dédiée en staging.
+- OpenNext packaging for Cloudflare Workers stabilized: `output: 'standalone'`, `prepare:standalone` script, and `build:cf` with `--skipNextBuild`.
+- Build/deploy scripts (web): `build:staging`, `build:production`, `deploy:staging`, `deploy:production`.
+- Cloudflare bindings alignment: explicit `INTERNAL_API_URL` (prod/staging) and dedicated KV RATE_LIMIT in staging.
 
 ### Fixed
-- Erreur de bundling OpenNext (pages-manifest manquant) résolue via standalone + préparation.
+- OpenNext bundling error (missing pages-manifest) resolved via standalone + preparation.
 
 ### Removed
-- Suppression du script `pages:deploy` et de la dépendance `@cloudflare/next-on-pages` (déploiement uniquement via Workers).
+- Removed `pages:deploy` script and `@cloudflare/next-on-pages` dependency (deployment via Workers only).
 
 ### Security
-- `AUTH_SECRET` configuré en production pour NextAuth v5 (signature des tokens recommandée).
+- `AUTH_SECRET` configured in production for NextAuth v5 (token signing recommended).
 
 ### Docs
-- `luna-proxy-web/ARCHITECTURE.md`: workflow “vault-only BYOK” clarifié (deposit → unwrap-on-session), audit logging, AES-GCM.
-- `luna-proxy-api/README.md`: Quick Start “deposit key → request session with project_id”, options d’auth (project_id ou JWT), exemple de requête.
+- `luna-proxy-web/ARCHITECTURE.md`: "vault-only BYOK" workflow clarified (deposit → unwrap-on-session), audit logging, AES-GCM.
+- `luna-proxy-api/README.md`: Quick Start "deposit key → request session with project_id", auth options (project_id or JWT), request example.
 
 ### Deployments
-- Staging: web + API OK (workers.dev), plus de warnings bindings.
-- Production: web déployé, API healthy.
+- Staging: web + API OK (workers.dev), no binding warnings.
+- Production: web deployed, API healthy.
 
 ## [1.0.0] - 2025-10-04
 
