@@ -252,14 +252,17 @@ git push
 
 ## 📊 Pricing Plans
 
-- **Free**: 200 minutes/month (app enforced)
-- **Starter**: $9/mo, 1500 min included, $0.012/min overage
-- **Build**: $19/mo, 3000 min included, $0.011/min overage
-- **Pro**: $39/mo, 8000 min included, $0.009/min overage
-- **Agency**: $99/mo, 25000 min included, $0.008/min overage
-- **Enterprise**: Custom pricing
+**Session-based pricing** (1 session = 1 WebRTC connection via AI Gate)
 
-See [Pricing Strategy](docs/setup/PRICING-STRATEGY.md) for details.
+- **Free**: 100 sessions/month (~200 minutes)
+- **Starter**: $29/month - 5,000 sessions (~10,000 minutes) + 3 projects + Email support (48h)
+- **Growth**: $99/month - 20,000 sessions (~40,000 minutes) + 10 projects + Priority support (24h) + 99.9% SLA
+
+✨ **Self-service** upgrade/downgrade via Stripe Customer Portal
+🔒 **Vault-encrypted BYOK** - Your OpenAI keys stay secure (AES-GCM wrapped)
+📊 **Transparent billing** - Sessions only counted when connection succeeds (>5s)
+
+See [Pricing Strategy](docs/setup/PRICING-STRATEGY.md) for complete details.
 
 ---
 
